@@ -43,6 +43,7 @@ SERVERNAME=server-canada
 SERVERCONF=$SERVERNAME/$SERVERNAME.conf
 SUBNET=172.16.23.0
 NETMASK=255.255.255.0
+VIRINTR=tun5
 
 
 newclient () {
@@ -262,7 +263,7 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
 	# Generate server.conf
 	echo "port $PORT
 proto $PROTOCOL
-dev tun
+dev $VIRINTR
 sndbuf 0
 rcvbuf 0
 ca /etc/openvpn/$SERVERNAME/ca.crt
@@ -338,14 +339,14 @@ crl-verify /etc/openvpn/$SERVERNAME/crl.pem" >> /etc/openvpn/$SERVERCONF
 Before=network.target
 [Service]
 Type=oneshot
-ExecStart=/sbin/iptables -t nat -A POSTROUTING -s $SUBNET/24 ! -d $SUBNET/24 -j SNAT --to $IP
+ExecStart=/sbin/iptables -t nat -A POSTROUTING -s $SUBNET/24 -j MASQUERADE
 ExecStart=/sbin/iptables -I INPUT -p $PROTOCOL --dport $PORT -j ACCEPT
 ExecStart=/sbin/iptables -I FORWARD -s $SUBNET/24 -j ACCEPT
-ExecStart=/sbin/iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
-ExecStop=/sbin/iptables -t nat -D POSTROUTING -s $SUBNET/24 ! -d $SUBNET/24 -j SNAT --to $IP
+#ExecStart=/sbin/iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+ExecStop=/sbin/iptables -t nat -D POSTROUTING -s $SUBNET/24 -j MASQUERADE
 ExecStop=/sbin/iptables -D INPUT -p $PROTOCOL --dport $PORT -j ACCEPT
 ExecStop=/sbin/iptables -D FORWARD -s $SUBNET/24 -j ACCEPT
-ExecStop=/sbin/iptables -D FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+#ExecStop=/sbin/iptables -D FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
 RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target" >> /etc/systemd/system/openvpn-iptables.service
