@@ -118,7 +118,7 @@ if [[ -e /etc/openvpn/$SERVERCONF ]]; then
 				rm -f pki/private/$CLIENT.key
 				rm -f pki/issued/$CLIENT.crt
 				rm -f /etc/openvpn/$SERVERNAME/crl.pem
-				cp /etc/openvpn/$SERVERNAME/easy-rsa/pki/crl.pem /etc/openvpn/server/crl.pem
+				cp /etc/openvpn/$SERVERNAME/easy-rsa/pki/crl.pem /etc/openvpn/$SERVERNAME/crl.pem
 				# CRL is read with each client connection, when OpenVPN is dropped to nobody
 				chown nobody:$GROUPNAME /etc/openvpn/$SERVERNAME/crl.pem
 				echo
